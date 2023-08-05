@@ -18,6 +18,8 @@ import org.apache.commons.csv.CSVRecord;
 
 public class Main {
 
+	static final long timer = System.currentTimeMillis();  /* to set up a timeline for events */
+	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		System.out.println("Start Dynamic Case...");

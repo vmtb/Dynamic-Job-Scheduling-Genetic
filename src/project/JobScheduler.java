@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Random; 
 
 
-public class JobScheduler {
-	ArrayList<Job> jobs = new ArrayList<Job>() ;
+public class JobScheduler implements Runnable {
+	ArrayList<Job> jobsQueue = new ArrayList<Job>() ;
 	ArrayList<Worker> workers = new ArrayList<Worker>() ;
 	protected double costMatrix [][]; 
 	protected long executionTimeGreedy = 0; 
@@ -16,13 +16,13 @@ public class JobScheduler {
 	
 	
 
-	public JobScheduler(ArrayList<Job> jobs, ArrayList<Worker> workers)  
-	{
-		this.jobs = jobs; 
+	public JobScheduler(ArrayList<Worker> workers)  
+	{ 
 		this.workers = workers; 
-		this.costMatrix = new double[workers.size()][jobs.size()];
-		initializeCostMatrix(); 
-		 
+	}
+	
+	public void addJobToQueue(Job job) {
+		jobsQueue.add(job);
 	}
 	
 	
@@ -134,17 +134,17 @@ public class JobScheduler {
 
 
 
-	public void initializeCostMatrix() {
-		for (int i = 0; i < this.workers.size(); i++) {
-			Worker w = this.workers.get(i); 
+	public double[][] initializeAndGetCostMatrix(ArrayList<Job> jobs, ArrayList<Worker> workrs) {
+		double costMatrix[][] = new double[workrs.size()][jobs.size()];
+		for (int i = 0; i < workrs.size(); i++) {
+			Worker w = workrs.get(i); 
 			System.out.println(); 
-			for (int j = 0; j < this.jobs.size(); j++) {  
-				this.costMatrix[i][j] = this.jobs.get(j).getStandardProcessingDurations().
+			for (int j = 0; j < jobs.size(); j++) {  
+				costMatrix[i][j] = jobs.get(j).getStandardProcessingDurations().
 						get(w.getCpuInfo().getFamilyName() + "-" + w.getCpuInfo().getDenomination() + "-" + w.getCpuInfo().getNumberOfCores());
-				//System.out.print(this.costMatrix[i][j]); 
-				//System.out.print("-"); 
 			}
 		}
+		return costMatrix;
 	}
 	
 	
@@ -170,6 +170,33 @@ public class JobScheduler {
 
 	public void setExecutionTimeExecution(long executionTimeExecution) {
 		this.executionTimeExecution = executionTimeExecution;
+	}
+	
+	public ArrayList<Job> getQueueJobs() {
+		return this.jobsQueue;
+	}
+
+
+	@Override
+	public void run() { 
+		
+		while(true) {
+			ArrayList<Job> jobs = this.getQueueJobs();
+			ArrayList<Worker> idleWorkers = this.workers;
+			double[][] costs = initializeAndGetCostMatrix(jobs, idleWorkers);  
+			
+			if(!jobs.isEmpty()) {
+				
+			}
+			
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) { 
+				e.printStackTrace();
+			}
+			
+		}
+ 		
 	}
 	
 	
