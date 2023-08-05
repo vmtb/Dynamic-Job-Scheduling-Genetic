@@ -1,0 +1,6 @@
+Worker PC Name,Available CPU Core Number,CPU Family Name,CPU Denomination,CPU Clock Rate,Available Memory Size,Available Disk Size,Connection Bandwidth With Master PC,Connection Delay With Master PC,Processing Time Ratio To PC1,Processing Time Ratio To PC2,Processing Time Ratio To PC3,Processing Time Ratio To PC4,Processing Time Ratio To PC5,OS
+PC1,4,core,i3,1.70GHz,2GB,64GB,100MB/s,00:00:00,1,1.66,2.98,4.43,5.06,WinOS
+PC2,4,core,i5,2.60GHz,2GB,64GB,100MB/s,00:00:00,0.6,1,1.79,2.67,3.04,WinOS
+PC3,8,core,i7,3.40GHz,4GB,64GB,100MB/s,00:00:00,0.33,0.55,1,1.48,1.69,Linux
+PC4,16,core,i9,3.60GHz,8GB,64GB,100MB/s,00:00:00,0.22,0.37,0.67,1,1.14,Linux
+PC5,20,core,i9,3.70GHz,8GB,64Gb,100MB/s,00:00:00,0.19,0.32,0.58,0.87,1,Linux
