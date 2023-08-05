@@ -1,18 +1,47 @@
 package project;
 
+import java.util.ArrayList;
+
 public class GeneticAlgo implements Runnable{
 
 	protected long executionTimeGreedy = 0; 
 	protected long executionTimePlanification = 0; 
 	protected long executionTimeExecution = 0; 
 	
+	ArrayList<Job> jobs = new ArrayList<Job>() ;
+	ArrayList<Worker> workers = new ArrayList<Worker>() ;
+	double costMatrix [][];
 	
+
 	
+	public GeneticAlgo(ArrayList<Job> jobs, ArrayList<Worker> workers, double[][] costMatrix) {
+		super();
+		this.jobs = jobs;
+		this.workers = workers;
+		this.costMatrix = costMatrix;
+	}
+
 	@Override
 	public void run() {
 	}
 	
 	public void start() {                          
+	}
+	
+	public Solution executeAlgo() {
+
+		//Get initial population
+		Population population = this.getPopulationInitial(); 
+		
+		// Planification 
+		Solution solution = this.startGeneticAlg(population, 1000);
+		
+		//  Exécution  
+		//	Display results  
+		//	System.out.print("Solution finale ");
+		//	solution.showSolution2(wksArrayList);
+		//	double makespan = solution.getScore(wksArrayList); 
+		return solution;
 	}
 	 
 	public Population getPopulationInitial() {  
@@ -28,7 +57,7 @@ public class GeneticAlgo implements Runnable{
 			greedyAlgo.divideInGroup(lastLimit, divs[i]);
 			
 			Solution singleSolution = greedyAlgo.greedyIteration(); 
-			//singleSolution.showSolution();
+			// singleSolution.showSolution();
 			
 			if(singleSolution.jobs.size()==this.jobs.size()) {
 				population.addSolution(singleSolution);
@@ -40,7 +69,7 @@ public class GeneticAlgo implements Runnable{
         long endTime = System.currentTimeMillis();
         this.setExecutionTimeGreedy(endTime-startTime);
 		
-		return population; 
+		return population;  
 	}
 	
 	/** 

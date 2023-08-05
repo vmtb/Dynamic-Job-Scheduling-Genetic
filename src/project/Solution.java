@@ -11,7 +11,7 @@ public class Solution implements Cloneable{
 	int NW = 0;
 	//une solution ==> [16, 8, 8, 2, 4, 2, 4, 16]
 
-
+	
 	public Solution(double[][] costMatrix) { 
 		this.costMatrix = costMatrix;
 		this.NJ = this.costMatrix[0].length; 

@@ -141,7 +141,7 @@ public class GreedyAlgo {
 	}
 
 
-	public ArrayList<Worker>  sortWorkers(ArrayList<Worker> worker){ 
+	public ArrayList<Worker> sortWorkers(ArrayList<Worker> worker){ 
 		for (int i = 0; i < worker.size(); i++) {
 			int minTime = worker.get(i).cpuInfo.getNumberOfCores();
 			int pos = i; 
@@ -161,7 +161,7 @@ public class GreedyAlgo {
 		return worker;
 	}
 
-	public ArrayList<Job>  sortJobs(ArrayList<Job> worker){ 
+	public ArrayList<Job> sortJobs(ArrayList<Job> worker){ 
 		for (int i = 0; i < worker.size(); i++) {
 			double minTime = worker.get(i).getTheta();
 			int pos = i; 

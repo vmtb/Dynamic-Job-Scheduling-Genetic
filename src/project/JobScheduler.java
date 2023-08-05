@@ -10,9 +10,6 @@ public class JobScheduler implements Runnable {
 	ArrayList<Job> jobsQueue = new ArrayList<Job>() ;
 	ArrayList<Worker> workers = new ArrayList<Worker>() ;
 	protected double costMatrix [][]; 
-	protected long executionTimeGreedy = 0; 
-	protected long executionTimePlanification = 0; 
-	protected long executionTimeExecution = 0; 
 	
 	
 
@@ -26,151 +23,19 @@ public class JobScheduler implements Runnable {
 	}
 	
 	
-	public Population getPopulationInitial() {  
-		/**  **/
-        long startTime = System.currentTimeMillis();
-		Population population = new Population(this.workers, this.jobs);
-		int[] divs = new int[] {5, 8, 14, 17, 22, 28}; 
-		int lastLimit = 0; 
-		for (int i = 0; i < divs.length; i++) { 
-			
-			GreedyAlgo greedyAlgo = new GreedyAlgo(this.jobs, this.workers, this.costMatrix);
-			
-			greedyAlgo.divideInGroup(lastLimit, divs[i]);
-			
-			Solution singleSolution = greedyAlgo.greedyIteration(); 
-			//singleSolution.showSolution();
-			
-			if(singleSolution.jobs.size()==this.jobs.size()) {
-				population.addSolution(singleSolution);
-			} 
-			
-			lastLimit =  divs[i]-2;   
-		}
-		
-        long endTime = System.currentTimeMillis();
-        this.setExecutionTimeGreedy(endTime-startTime);
-		
-		return population; 
-	}
-	
-	/** 
-	 * @param p
-	 */
-	public Solution startGeneticAlg(Population p, int nbStopCriteria) {
-        long startTime = System.currentTimeMillis();
-		System.out.println("Taille de la population initiale: "+p.solutions.size());
-		int conv = 0;
-		Solution solutionFinal = null; 
-		while(conv<nbStopCriteria) {
-			//calculate score//  
-			double scores [] = p.getScorePopulation();
-			
-			//Sort scores from the lowest to the highest
-			p.sortScorePopulation();
-			Population population = p.clone(); 
-			
-			//Make selection
-			p.makeSelection(); 
-			
-			// Crossover
-			p.doCrossOver(); 
-
-			// Mutation
-			//1st parent 
-			p.doMutation();
-			
-			// Check score
-			Solution p1p = p.parent1;
-			Solution p2p = p.parent2;
-			double score1 = p1p.getScore(this.workers);
-			double score2 = p2p.getScore(this.workers);
-			double scoreP1 = scores[0]; 
-			double scoreP2 = scores[1]; 
-			boolean oneSolution = false;  
-			if((score1<scoreP1 || score1<scoreP2) &&  score1!=scoreP1 && score1 !=scoreP2) {
-				System.out.println("add enfant 1 ");
-				population.getSolutions().remove(population.getSolutions().size()-1);
-				population.addSolution(p1p);
-				oneSolution = true;
-			}
-			
-			
-			if((score2<scoreP1 || score2<scoreP2) && (score2!=scoreP1 && score2 !=scoreP2)) {
-				System.out.println("add enfant 2 ");
-				// Si le dernier parent était déjà enlevé //
-				if(oneSolution) {   
-					population.getSolutions().remove(population.getSolutions().size()-2);  
-				}else {  
-					population.getSolutions().remove(population.getSolutions().size()-1); 
-				} 
-				population.addSolution(p2p); 
-				oneSolution = true;  
-			} 
-			
-			if(!oneSolution) { 
-				conv++;  
-			}else { 
-				conv=0; 
-			}
-			
-			population.sortScorePopulation();
-			p = population.clone();
-			solutionFinal = population.getSolutions().get(0);
-
-			 System.out.println("------ result process ------ ");
-
-			System.out.println("Score parent 1: "+scoreP1);
-			System.out.println("Score parent 2: "+scoreP2);
-			System.out.println("Score Enfant 1: "+score1);
-			System.out.println("Score Enfant 2: "+score2);
-			System.out.println();
-		}
-        long endTime = System.currentTimeMillis();
-        this.setExecutionTimePlanification(endTime-startTime);
-        
-        return solutionFinal;
-	}
-
-
-
 	public double[][] initializeAndGetCostMatrix(ArrayList<Job> jobs, ArrayList<Worker> workrs) {
 		double costMatrix[][] = new double[workrs.size()][jobs.size()];
 		for (int i = 0; i < workrs.size(); i++) {
 			Worker w = workrs.get(i); 
 			System.out.println(); 
 			for (int j = 0; j < jobs.size(); j++) {  
-				costMatrix[i][j] = jobs.get(j).getStandardProcessingDurations().
-						get(w.getCpuInfo().getFamilyName() + "-" + w.getCpuInfo().getDenomination() + "-" + w.getCpuInfo().getNumberOfCores());
+				costMatrix[i][j] = jobs.get(j).getExecutionTimeByWorker(w);
 			}
 		}
 		return costMatrix;
 	}
 	
 	
-	public long getExecutionTimeGreedy() {
-		return executionTimeGreedy;
-	}
-
-	public long getExecutionTimePlanification() {
-		return executionTimePlanification;
-	}
-
-	public long getExecutionTimeExecution() {
-		return executionTimeExecution;
-	}
-
-	public void setExecutionTimeGreedy(long executionTimeGreedy) {
-		this.executionTimeGreedy = executionTimeGreedy;
-	}
-
-	public void setExecutionTimePlanification(long executionTimePlanification) {
-		this.executionTimePlanification = executionTimePlanification;
-	}
-
-	public void setExecutionTimeExecution(long executionTimeExecution) {
-		this.executionTimeExecution = executionTimeExecution;
-	}
 	
 	public ArrayList<Job> getQueueJobs() {
 		return this.jobsQueue;
@@ -186,7 +51,31 @@ public class JobScheduler implements Runnable {
 			double[][] costs = initializeAndGetCostMatrix(jobs, idleWorkers);  
 			
 			if(!jobs.isEmpty()) {
+				GeneticAlgo geneticAlgo = new GeneticAlgo(jobs, idleWorkers, costs);
+				Solution solution = geneticAlgo.executeAlgo(); 
 				
+				int[] sols = solution.getSolution(); 
+				ArrayList<String> affectedArrayList = new ArrayList<>();
+				for (int i = 0; i < sols.length; i++) {
+					//Liam Kurt Yonnan//
+					Job j = jobs.get(i);
+					if(!affectedArrayList.contains(sols[i]+"")) {
+						Worker w=null;
+						int wkIndexAt = -1;
+						for (int c = 0; c <  this.workers.size(); c++) { 
+							if(this.workers.get(c).getBase10Name() == sols[i]) {
+								w = this.workers.get(c);
+								wkIndexAt = c;
+							}
+						}
+						j.setAssignmentTime(System.currentTimeMillis());
+						w.setEndingTime(w.getEndingTime()+j.getExecutionTimeByWorker(w));
+						this.workers.set(wkIndexAt, w);
+						affectedArrayList.add(w.getBase10Name()+"");
+					}					
+				}
+				
+				System.out.println();
 			}
 			
 			try {
