@@ -1,5 +1,6 @@
 package project;
  
+import java.io.Console;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -10,12 +11,14 @@ public class JobScheduler implements Runnable {
 	ArrayList<Job> jobsQueue = new ArrayList<Job>() ;
 	ArrayList<Worker> workers = new ArrayList<Worker>() ;
 	protected double costMatrix [][]; 
+	protected int jobNumber = 0;
 	
 	
 
-	public JobScheduler(ArrayList<Worker> workers)  
+	public JobScheduler(ArrayList<Worker> workers, int jobNumber)  
 	{ 
 		this.workers = workers; 
+		this.jobNumber = jobNumber;
 	}
 	
 	public void addJobToQueue(Job job) {
@@ -24,12 +27,17 @@ public class JobScheduler implements Runnable {
 	
 	
 	public double[][] initializeAndGetCostMatrix(ArrayList<Job> jobs, ArrayList<Worker> workrs) {
-		double costMatrix[][] = new double[workrs.size()][jobs.size()];
+	 
+		int size = jobs.size(); 
+		double costMatrix[][] = new double[workrs.size()][size];
 		for (int i = 0; i < workrs.size(); i++) {
-			Worker w = workrs.get(i); 
-			System.out.println(); 
-			for (int j = 0; j < jobs.size(); j++) {  
+			Worker w = workrs.get(i);  
+			workrs.get(i).setTEMPID(i+1);
+			System.out.println("Worker "+i); 
+			for (int j = 0; j < size; j++) {  
+				//System.out.println("job "+j+" -- "+jobs.size()); 
 				costMatrix[i][j] = jobs.get(j).getExecutionTimeByWorker(w);
+				jobs.get(j).setTEMPID(j+1);
 			}
 		}
 		return costMatrix;
@@ -40,20 +48,44 @@ public class JobScheduler implements Runnable {
 	public ArrayList<Job> getQueueJobs() {
 		return this.jobsQueue;
 	}
+	
+	ArrayList<Worker> getAvailableWorkers(){
+		ArrayList<Worker> outsArrayList = new ArrayList<Worker>();
+		for (int i = 0; i < this.workers.size(); i++) {
+			Worker worker = this.workers.get(i);
+			long endTime = worker.getEndingTime();
+			System.out.println("Worker "+worker.getID()+ ":"+System.currentTimeMillis()+" - "+endTime);
+			if(endTime<System.currentTimeMillis()) {
+				outsArrayList.add(worker);
+			}
+		}
+		return outsArrayList;
+	}
+	
+	int treatedJobs = 0;
 
 
 	@Override
 	public void run() { 
 		
-		while(true) {
+		while(treatedJobs<this.jobNumber) { //true
+			System.out.println("Iteration");
 			ArrayList<Job> jobs = this.getQueueJobs();
-			ArrayList<Worker> idleWorkers = this.workers;
-			double[][] costs = initializeAndGetCostMatrix(jobs, idleWorkers);  
+			ArrayList<Worker> idleWorkers = this.getAvailableWorkers();
+			System.out.println("Queue size: "+jobs.size());
+			System.out.println("Available workers size: "+idleWorkers.size());
 			
-			if(!jobs.isEmpty()) {
+			if(!jobs.isEmpty() && !idleWorkers.isEmpty()) {
+				/*static part*/
+				ArrayList<Job> tempJobs = jobs; //cloneQueue(jobs);
+				System.out.println("Job -- bef"+tempJobs.get(0).ID); 
+				double[][] costs = initializeAndGetCostMatrix(tempJobs, idleWorkers);  
+
+				System.out.println("Job -- aft (for temp)"+tempJobs.get(0).TEMPID); 
 				GeneticAlgo geneticAlgo = new GeneticAlgo(jobs, idleWorkers, costs);
 				Solution solution = geneticAlgo.executeAlgo(); 
-				
+
+				/*get assigned et let non assigned part*/
 				int[] sols = solution.getSolution(); 
 				ArrayList<String> affectedArrayList = new ArrayList<>();
 				for (int i = 0; i < sols.length; i++) {
@@ -68,12 +100,16 @@ public class JobScheduler implements Runnable {
 								wkIndexAt = c;
 							}
 						}
+						treatedJobs++;
 						j.setAssignmentTime(System.currentTimeMillis());
-						w.setEndingTime(w.getEndingTime()+j.getExecutionTimeByWorker(w));
+						j.setEndExecutionTime(System.currentTimeMillis()+j.getExecutionTimeByWorker(w)*10); //*1000
+						w.setEndingTime(j.getEndExecutionTime());
 						this.workers.set(wkIndexAt, w);
+						this.jobsQueue.remove(j.TEMPID-1);
 						affectedArrayList.add(w.getBase10Name()+"");
 					}					
 				}
+				System.out.println("Queue size at the end: "+this.jobsQueue.size());
 				
 				System.out.println();
 			}
@@ -87,6 +123,14 @@ public class JobScheduler implements Runnable {
 		}
  		
 	}
+	private ArrayList<Job> cloneQueue(ArrayList<Job> alls) {
+		ArrayList<Job> outsArrayList = new ArrayList<Job>();
+		for (int i = 0; i < alls.size(); i++) {
+			outsArrayList.add(alls.get(i));
+		} 
+		return outsArrayList;
+	}
+
 	
 	
 }

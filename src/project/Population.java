@@ -123,26 +123,32 @@ public class Population  implements Cloneable {
 		int s1[] = this.parent1.getSolution() ; 
 		int s2[] = this.parent2.getSolution() ; 
 		
-		//1st parent
-		int m = (new Random()).nextInt(this.parent1.solution.length-1);
-		int s1p[] = s1.clone(); 
-		int tempS1m = s1[m]; 
-		s1p[m] = s1[m+1];
-		s1p[m+1] = tempS1m;  
-		if(changeRespectsConstrains(s1p)) {
-			this.parent1.setSolution(s1p);
+		try {
+			//1st parent
+			int m = (new Random()).nextInt(this.parent1.solution.length);
+			int s1p[] = s1.clone(); 
+			int tempS1m = s1[m]; 
+			s1p[m] = s1[m+1];
+			s1p[m+1] = tempS1m;  
+			if(changeRespectsConstrains(s1p)) {
+				this.parent1.setSolution(s1p);
+			}
+			
+			
+			//2nd parent
+			m = (new Random()).nextInt(this.parent1.solution.length);
+			int s2p[] = s2.clone();
+			int tempS2m = s2[m]; 
+			s2p[m] = s2[m+1];
+			s2p[m+1] = tempS2m;  
+			if(changeRespectsConstrains(s2p)) { 
+				this.parent2.setSolution(s2p); 
+			} 
+		} catch (Exception e) {
+			System.out.println("Mutation out of bounds");
+			// TODO: handle exception
+			
 		}
-		
-		
-		//2nd parent
-		m = (new Random()).nextInt(this.parent1.solution.length-1);
-		int s2p[] = s2.clone();
-		int tempS2m = s2[m]; 
-		s2p[m] = s2[m+1];
-		s2p[m+1] = tempS2m;  
-		if(changeRespectsConstrains(s2p)) { 
-			this.parent2.setSolution(s2p); 
-		} 
 		
 		System.out.println("Parent 1: "+this.parent1.getScore(this.workers));
 		System.out.println("Parent 2: "+this.parent2.getScore(this.workers));
@@ -163,7 +169,7 @@ public class Population  implements Cloneable {
 		for (int jobIndex = 0; jobIndex < solutions.length; jobIndex++) {
 			Job job = null; 
 			for (int i = 0; i < this.jobs.size(); i++) {
-				if(this.jobs.get(i).ID==jobIndex+1) {
+				if(this.jobs.get(i).TEMPID==jobIndex+1) {
 					job = this.jobs.get(i);
 				}
 			} 

@@ -8,6 +8,7 @@ import java.util.List;
 public class Worker  /* this class represents a UPC worker */
 {
 	protected int ID = 0;  /* ID used to uniquely identify this worker */
+	protected int TEMPID = 0;
 	protected CPU cpuInfo = null;  /* information related to this worker CPU(s) */
 	protected List<Job> assignedJobs = Collections.synchronizedList(new ArrayList<Job>());  /* the jobs that have been assigned to this worker and have not finished being processed */
 	protected double cpuUsageInPercentage = 0.0; /* the percentage of the CPU capacity that is being used on this worker */
@@ -23,13 +24,30 @@ public class Worker  /* this class represents a UPC worker */
 	protected String name = "";  /* name of this worker */
 	
 	protected int base10Name = 0;  /* 5 => 10000 => 16 |  */
+	protected long endingTime = 0;
 	
+	public int getTEMPID() {
+		return TEMPID;
+	}
+
+	public void setTEMPID(int tEMPID) {
+		TEMPID = tEMPID;
+	}
+
 	public int getBase10Name() {
 		return base10Name;
 	}
 
 	public void setBase10Name(int base10Name) {
 		this.base10Name = base10Name;
+	} 
+	
+	public long getEndingTime() {
+		return endingTime;
+	}
+
+	public void setEndingTime(long endingTime) {
+		this.endingTime = endingTime;
 	}
 
 	public Worker(int ID, CPU cpuInfo, double currentGlobalCPUTime, double availableMemorySize, double availableDiskSize, List<Job> assignedJobs,
@@ -38,6 +56,7 @@ public class Worker  /* this class represents a UPC worker */
 	/* this constructor creates and initializes a new worker with the given parameters */
 	{
 		this.ID = ID;
+		this.TEMPID = ID;
 		this.cpuInfo = cpuInfo;
 		this.availableMemorySize = availableMemorySize; 
 		this.availableDiskSize = availableDiskSize; 

@@ -16,12 +16,15 @@ import org.apache.commons.csv.CSVRecord;
 
 class PoissonDistributedJobProvisioner implements Runnable {
 	protected JobScheduler jobScheduler = null;
-	protected double poissonDistrMeanValue = 15.0;
+	protected double poissonDistrMeanValue = 15.0; //????????????????
 	protected int csvFileIterationCount = 1;
+	protected int jobNumberFileIndex = 1;
 
-	public PoissonDistributedJobProvisioner(JobScheduler jobScheduler, double poissonDistrMeanValue) {
+	 
+	public PoissonDistributedJobProvisioner(JobScheduler jobScheduler, double poissonDistrMeanValue, int jobNumberFileIndex) {
 		this.jobScheduler = jobScheduler;
 		this.poissonDistrMeanValue = poissonDistrMeanValue;
+		this.jobNumberFileIndex = jobNumberFileIndex;
 	}
 
 	public JobScheduler getJobScheduler() {
@@ -39,12 +42,15 @@ class PoissonDistributedJobProvisioner implements Runnable {
 	public void setPoissonDistrMeanValue(double poissonDistrMeanValue) {
 		this.poissonDistrMeanValue = poissonDistrMeanValue;
 	}
-
+	
+	@Override
 	public void run() /* start provisioning Poisson distributed jobs */
 	{
 		/* job CSV file parsing */
+
+		System.out.println("Poisson");
 		try {
-			Reader csvData = new FileReader(".\\data\\jobs.csv");
+			Reader csvData = new FileReader(".\\data\\jobs"+jobNumberFileIndex+".csv");
 			CSVParser parser = null;
 
 			try {
@@ -156,9 +162,10 @@ class PoissonDistributedJobProvisioner implements Runnable {
 							double dockerFileSize = 0.0, estimatedResultFileSize = 0.0;
 
 							/* we set the new job's attributes based on the current CSV file line data */
-							newJob.setArrivalTime(System.currentTimeMillis() / 10);
+							newJob.setArrivalTime(System.currentTimeMillis()/10); /// 10
 							newJob.setCurrentlyAssignedToWorker(false);
-							newJob.setID(++JobScheduler.lastJobID);
+							// newJob.setID(++JobScheduler.lastJobID);
+							newJob.setID(csvFileLine);
 							newJob.setFinishedBeingProcessedOnAssignedWorker(false);
 							newJob.setName(csvRecord.get(csvFileLine).get(jobNameColumn) + jobNameSuffix);
 							newJob.setInducedCPUUsageIncreasePercentage(0.80);
@@ -465,36 +472,30 @@ class PoissonDistributedJobProvisioner implements Runnable {
 
 							newJob.setEstimatedResultFileSize(estimatedResultFileSize);// newJob.print();
 
+							int temps = this.getPoisson(this.getPoissonDistrMeanValue()); 
+							System.out.println("Wait for "+temps*1000+"ms poisson");
+							
 							synchronized (System.out) {
+								this.jobScheduler.addJobToQueue(newJob);
 								/* we add the newly populated job to the queue of waiting jobs */
-								synchronized (this.jobScheduler.getJobGroups()) {
-									this.jobScheduler.addNewJobToGroup(newJob, false);
-									System.out.println("<<<<< " + newJob.getName()
-											+ " <<<<< (new job arrival) / Elapsed Time: "
-											+ String.format("%02d:%02d:%02d",
-													Math.round((System.currentTimeMillis() - Main.timer) / 10) / 3600,
-													(Math.round((System.currentTimeMillis() - Main.timer) / 10) % 3600)
-															/ 60,
-													Math.round((System.currentTimeMillis() - Main.timer) / 10) % 60)
-											+ " <<<<<");
-								}
-								;
+								System.out.println("<<<<< " + newJob.getName()
+								+ " <<<<< (new job arrival) / Elapsed Time: "
+								+ String.format("%02d:%02d:%02d",
+										Math.round((System.currentTimeMillis() - Main.timer) / 10) / 3600,
+										(Math.round((System.currentTimeMillis() - Main.timer) / 10) % 3600)
+												/ 60,
+										Math.round((System.currentTimeMillis() - Main.timer) / 10) % 60)
+								+ " <<<<<");
 
 								System.out.flush();
-							}
 
+							}
 							try {
-								Thread.sleep(this.getPoisson(this.getPoissonDistrMeanValue()) * 1000); /*
-																										 * we sleep the
-																										 * job arrival
-																										 * process in
-																										 * order to get
-																										 * a Poisson
-																										 * distribution
-																										 */
+								Thread.sleep( temps * 1000); /* 										 */
 							} catch (InterruptedException e) {
 								e.printStackTrace();
 							}
+
 						}
 					}
 				}
@@ -517,7 +518,7 @@ class PoissonDistributedJobProvisioner implements Runnable {
 	private int getPoisson(double poissonDistrMeanValue) {
 		double L = Math.exp(-poissonDistrMeanValue);
 		double p = 1.0;
-		int k = 0;
+		int k = 0; 
 
 		do {
 			k++;

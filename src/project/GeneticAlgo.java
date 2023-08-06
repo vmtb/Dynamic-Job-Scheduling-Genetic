@@ -34,7 +34,7 @@ public class GeneticAlgo implements Runnable{
 		Population population = this.getPopulationInitial(); 
 		
 		// Planification 
-		Solution solution = this.startGeneticAlg(population, 1000);
+		Solution solution = this.startGeneticAlg(population, 10);
 		
 		//  Exécution  
 		//	Display results  

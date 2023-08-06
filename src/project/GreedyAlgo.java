@@ -69,8 +69,8 @@ public class GreedyAlgo {
 			for (int l = 0; l < jbsArrayList.size(); l++) {
 				double theta = 0;
 				for (int l2 = 0; l2 < wksArrayList.size()-1; l2++) {
-					int newIndexL = wksArrayList.get(l2).ID-1;
-					int newIndexLplusUN = wksArrayList.get(l2+1).ID-1;
+					int newIndexL = wksArrayList.get(l2).TEMPID-1;
+					int newIndexLplusUN = wksArrayList.get(l2+1).TEMPID-1;
 					theta += costMatrixSimul[newIndexL][l]/costMatrixSimul[newIndexLplusUN][l];
 				}
 				Job job = jbsArrayList.get(l); 
@@ -78,14 +78,15 @@ public class GreedyAlgo {
 				jbsArrayList.set(l, job);
 			}
 			
+			// parcours la liste des jobs 
 			jbsArrayList = sortJobs(jbsArrayList); 
 			for (int l = 0; l < jbsArrayList.size(); l++) {
 				Job job = jbsArrayList.get(l);  
 				double miniMum = Double.MAX_VALUE; 
 				int currentIndex = -1 ;
-				int newIndexL = jbsArrayList.get(l).ID-1;
+				int newIndexL = jbsArrayList.get(l).TEMPID-1;
 				for (int l2 = 0; l2 < wksArrayList.size(); l2++) {
-					int newIndexL2 = wksArrayList.get(l2).ID-1;
+					int newIndexL2 = wksArrayList.get(l2).TEMPID-1;
 					if(miniMum>=costMatrixSimul[newIndexL2][newIndexL] 
 							&& 
 							wksArrayList.get(l2).getAvailableDiskSize() >= job.getRequiredDiskSizeForExecution() 
@@ -96,7 +97,7 @@ public class GreedyAlgo {
 					}
 				}
 				
-				System.out.print(job.ID+"-");
+				System.out.print(job.ID+"-"+job.TEMPID+"-");
 				if(currentIndex>=0) {
 					Worker worker = wksArrayList.get(currentIndex); 
 					job.setAssignedWorker(worker);				
@@ -104,7 +105,7 @@ public class GreedyAlgo {
 					singleSolution.addJob(job); 
 					
 					for (int i = 0; i < costMatrix[0].length; i++) {  
-						costMatrixSimul[worker.ID-1][i] = costMatrixSimul[worker.ID-1][i]+costMatrixSimul[worker.ID-1][job.ID-1] ;
+						costMatrixSimul[worker.TEMPID-1][i] = costMatrixSimul[worker.TEMPID-1][i]+costMatrixSimul[worker.TEMPID-1][job.TEMPID-1] ;
 					}
 					
 					
@@ -120,6 +121,7 @@ public class GreedyAlgo {
 					System.out.println("Not found "+wksArrayList.size());
 					System.out.println("Not found "+wksArrayList.size());
 					l--;  
+					break; 
 				} 
 			}   
 		} 

@@ -22,10 +22,10 @@ public class Solution implements Cloneable{
 	protected void reconstituteSolution() {
 		for (int i = 0; i < this.jobs.size(); i++) {
 			Job job = this.jobs.get(i); 
-			int jobIndex = job.ID-1; 
-			int workerIndex = job.assignedWorker.ID-1; 
+			int jobIndex = job.TEMPID-1; 
+			int workerIndex = job.assignedWorker.TEMPID-1; 
 			int val = job.assignedWorker.getBase10Name();   
-			this.solution[job.ID-1] = val;
+			this.solution[job.TEMPID-1] = val;
 		}
 	}
 	 
@@ -33,7 +33,7 @@ public class Solution implements Cloneable{
 	public void addJob(Job j) {
 		if(!this.jobs.contains(j)) { 
 			this.jobs.add(j);
-			reconstituteSolution();
+			reconstituteSolution(); 
 		}
 	}
 	
@@ -42,11 +42,11 @@ public class Solution implements Cloneable{
 		for (int i = 0; i < this.jobs.size(); i++) {
 			Job job = this.jobs.get(i); 
 			
-			int jobIndex = job.ID-1; 
-			int workerIndex = job.assignedWorker.ID-1; 
+			int jobIndex = job.TEMPID-1; 
+			int workerIndex = job.assignedWorker.TEMPID-1; 
 			int val = job.assignedWorker.getBase10Name(); 
 			
-			System.out.println("Job "+(job.ID)+" =====>  Worker "+job.assignedWorker.ID+" ("+val+")  ====> ("+this.costMatrix[job.assignedWorker.ID-1][job.ID-1]+")"); 
+			System.out.println("Job "+(job.TEMPID)+" =====>  Worker "+job.assignedWorker.TEMPID+" ("+val+")  ====> ("+this.costMatrix[job.assignedWorker.TEMPID-1][job.TEMPID-1]+")"); 
 		}
 	}
 
@@ -56,7 +56,7 @@ public class Solution implements Cloneable{
 		for (int i = 0; i < this.solution.length; i++) {
 			Job job = null;
 			for (int j = 0; j < this.jobs.size(); j++) {
-				if(this.jobs.get(j).ID==i+1) {
+				if(this.jobs.get(j).TEMPID==i+1) {
 					job = this.jobs.get(j);
 					break;
 				}
@@ -71,7 +71,7 @@ public class Solution implements Cloneable{
 			} 
 			
 			job.setAssignedWorker(worker);
-			System.out.print("// Job "+(job.ID)+" =====>  Worker "+job.assignedWorker.ID+"  ====> ("+this.costMatrix[job.assignedWorker.ID-1][job.ID-1]+")");
+			System.out.print("// Job "+(job.TEMPID)+" =====>  Worker "+job.assignedWorker.TEMPID+"  ====> ("+this.costMatrix[job.assignedWorker.TEMPID-1][job.TEMPID-1]+")");
 			System.out.println();  
 		}
 	}
@@ -86,7 +86,7 @@ public class Solution implements Cloneable{
 			for (int k = 0; k < this.solution.length; k++) {
 				int workerVal = this.solution[k];  
 				if(workers.get(i).getBase10Name()==workerVal) {
-					tempGene+=costs[workers.get(i).ID-1][k]; 
+					tempGene+=costs[workers.get(i).TEMPID-1][k]; 
 				}  
 			} 
 			ssworkers[i] = tempGene;  

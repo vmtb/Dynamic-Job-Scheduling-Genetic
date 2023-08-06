@@ -26,9 +26,17 @@ public class Main {
 		
 		try {
 //			ArrayList<Job> jobs = getJobs("2");
-//			ArrayList<Worker> wksArrayList = getWorkers();
-//			
-//			JobScheduler jobScheduler = new JobScheduler(jobs, wksArrayList);
+			int jobNumberFileIndex = 1; 
+			ArrayList<Worker> wksArrayList = getWorkers();
+			JobScheduler jobScheduler = new JobScheduler(wksArrayList, 14*jobNumberFileIndex); 
+			Thread jobSchedulerThread = new Thread(jobScheduler);
+			jobSchedulerThread.start();
+			
+			PoissonDistributedJobProvisioner poisson = new PoissonDistributedJobProvisioner(jobScheduler, 5, jobNumberFileIndex);
+			Thread poissonDistributedJobProvisionerThread = new Thread(poisson);
+			poissonDistributedJobProvisionerThread.start();
+			
+			
 //			
 //			//Get initial population
 //			Population population = jobScheduler.getPopulationInitial(); 

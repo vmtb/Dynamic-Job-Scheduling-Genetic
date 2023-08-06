@@ -5,6 +5,7 @@ import java.util.HashMap;
 public class Job implements Runnable  /* this class represents a UPC job */
 {
 	protected int ID = 0;  /* ID used to uniquely identify this job */
+	protected int TEMPID = 0;  /* ID used to uniquely identify this job */
 	protected int threadProcessCount = 1;  /* the number of threads or processes this job uses during its execution */
 	protected Worker assignedWorker = null;  /* this job's assigned worker */
 	protected HashMap<String, Long> standardProcessingDurations = new HashMap<String, Long>();  /* this job's standard processing durations on different types of CPU */
@@ -17,6 +18,7 @@ public class Job implements Runnable  /* this class represents a UPC job */
 	protected double jobCurrentCPUTime = 0.0;  /* this job's current CPU time including execution time, transfer time, result transmission time, etc */
 	protected long arrivalTime = 0;  /* the time this job has been submitted to the master PC (initially set to master PC's system time) */
 	protected long assignmentTime = 0;  /* the time this job has been assigned to a worker PC */
+	protected long endExecutionTime = 0;  /* the time this job has been assigned to a worker PC */
 	protected boolean currentlyAssignedToWorker = false;  /* whether this job is currently assigned to a worker or not */
 	protected boolean finishedBeingProcessedOnAssignedWorker = false;  /* whether this job has finished being processed on its assigned worker or not */
 	protected boolean currentlyBeingProcessedOnAssignedWorker = false;  /* whether this job is being processed on its assigned worker or not */
@@ -29,11 +31,13 @@ public class Job implements Runnable  /* this class represents a UPC job */
 			initializes a new job with the given parameters */
 	{
 		this.ID = ID;
+		this.TEMPID = ID;
 		this.standardProcessingDurations = standardProcessingDurations;
 		this.requiredMemorySizeForExecution = requiredMemorySizeForExecution;
 		this.requiredDiskSizeForExecution = requiredDiskSizeForExecution;
 		this.dockerFileSize = dockerFileSize;
 		this.assignmentTime = assignmentTime;
+		this.endExecutionTime = 0;
 		this.threadProcessCount = threadProcessCount;
 		this.estimatedResultFileSize = estimatedResultFileSize;
 		this.dockerFileGenerationDurationOnMasterPC = dockerFileGenerationDurationOnMasterPC;
@@ -50,8 +54,28 @@ public class Job implements Runnable  /* this class represents a UPC job */
 	{
 		
 	}
-	
-	
+	 
+
+	public long getEndExecutionTime() {
+		return endExecutionTime;
+	}
+
+	public void setEndExecutionTime(long endExecutionTime) {
+		this.endExecutionTime = endExecutionTime;
+	}
+
+	public int getTEMPID() {
+		return TEMPID;
+	}
+
+	public void setTEMPID(int tEMPID) {
+		TEMPID = tEMPID;
+	}
+
+	public long getExecutionTimeByWorker(Worker w) {
+		return this.getStandardProcessingDurations().
+				get(w.getCpuInfo().getFamilyName() + "-" + w.getCpuInfo().getDenomination() + "-" + w.getCpuInfo().getNumberOfCores());
+	}
 	
 	public Job duplicate(Job job)  /* creates a new copy of the passed in job */
 	{
